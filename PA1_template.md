@@ -95,13 +95,14 @@ We can add a bit more context by adding a rug to the histogram.
 
 
 ```r
-totals <- aggregate(nonmissing$steps, by=list(Date = nonmissing$date), FUN = sum)
-hist(totals$x, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
-rug(totals$x)
+totals <- aggregate(list(TotalStep = nonmissing$steps), by=list(Date = nonmissing$date), FUN = sum)
+hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
+rug(totals$TotalStep)
 ```
 
 ![](PA1_template_files/figure-html/aggregate_steps_by_date-1.png)<!-- -->
 
+The **mean** is 10766.1886792453 steps and the **median** is 10765 steps
 
 ## What is the average daily activity pattern?
 
