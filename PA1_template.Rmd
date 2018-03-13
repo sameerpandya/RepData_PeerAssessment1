@@ -1,10 +1,5 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-
+Reproducible Research: Peer Assessment 1
+===========================================
 
 ## Loading and preprocessing the data
 First we unzip the data. Then we'll load the unziped CSV it into a variable called *data*.  
@@ -44,7 +39,7 @@ Now let's sum up the number of steps in each day. We can do that with the **aggr
 
 We can add a bit more context by adding a rug to the histogram.
 
-```{r aggregate_steps_by_date, echo=TRUE}
+```{r aggregate_steps_by_date}
 totals <- aggregate(list(TotalStep = nonmissing$steps), by=list(Date = nonmissing$date), FUN = sum)
 hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
 rug(totals$TotalStep)

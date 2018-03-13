@@ -1,10 +1,5 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-
+Reproducible Research: Peer Assessment 1
+===========================================
 
 ## Loading and preprocessing the data
 First we unzip the data. Then we'll load the unziped CSV it into a variable called *data*.  
@@ -100,7 +95,7 @@ hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", 
 rug(totals$TotalStep)
 ```
 
-![](PA1_template_files/figure-html/aggregate_steps_by_date-1.png)<!-- -->
+![plot of chunk aggregate_steps_by_date](figure/aggregate_steps_by_date-1.png)
 
 The **mean** is 10766.1886792453 steps and the **median** is 10765 steps
 
