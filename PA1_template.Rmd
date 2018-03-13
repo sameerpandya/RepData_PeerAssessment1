@@ -8,13 +8,13 @@ output:
 
 ## Loading and preprocessing the data
 First we unzip the data. Then we'll load the unziped CSV it into a variable called *data*.  
-```{r load_data}
+```{r load_data, echo=TRUE}
 unzip("activity.zip")
 data <- read.csv("activity.csv")
 ```
   
 Then let's look at the data
-```{r examine_data}
+```{r examine_data, echo=TRUE}
 names(data)
 head(data)
 str(data)
@@ -22,7 +22,7 @@ str(data)
 
 Notice that the date column comes in as a Factor. Let's change that the type to Date. The format is YYYY-MM-DD.
 
-```{r change_date_type}
+```{r change_date_type, echo=TRUE}
 data$date <- as.Date(data$date)
 str(data)
 ```
@@ -33,7 +33,7 @@ Great! We should be ready to go!
 
 ## What is mean total number of steps taken per day?
 Let's first get rid of the missing values in the data set.
-```{r get_rid_of_missing values}
+```{r get_rid_of_missing values, echo=TRUE}
 dim(data)
 nonmissing <- data[complete.cases(data), ]
 dim(nonmissing)
@@ -44,7 +44,7 @@ Now let's sum up the number of steps in each day. We can do that with the **aggr
 
 We can add a bit more context by adding a rug to the histogram.
 
-```{r aggregate_steps_by_date}
+```{r aggregate_steps_by_date, echo=TRUE}
 totals <- aggregate(list(TotalStep = nonmissing$steps), by=list(Date = nonmissing$date), FUN = sum)
 hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
 rug(totals$TotalStep)
