@@ -39,7 +39,7 @@ Now let's sum up the number of steps in each day. We can do that with the **aggr
 
 We can add a bit more context by adding a rug to the histogram.
 
-```{r aggregate_steps_by_date}
+```{r aggregate_steps_by_date, echo=TRUE}
 totals <- aggregate(list(TotalStep = nonmissing$steps), by=list(Date = nonmissing$date), FUN = sum)
 hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
 rug(totals$TotalStep)
@@ -48,8 +48,31 @@ rug(totals$TotalStep)
 The **mean** is `r toString(mean(totals$TotalStep))` steps and the **median** is `r median(totals$TotalStep)` steps
 
 ## What is the average daily activity pattern?
+What we need to do here is aggregate over the interval. So first let's look at what the interval looks like.
 
+```{r explore_interval, echo=TRUE}
+unique(nonmissing$interval)
+```
 
+Note that the values for the interval identify the five minute interval in day. The format is HHMM, that is to say, 2355 corresponds with 23:55 (11:55 PM.)
+
+So now, let's aggreagate over the interval, to get an average number of steps for each five minute interval (over the days in the data set.) and 
+
+```{r aggregate_over_interval, echo=TRUE}
+totalsByInterval <- aggregate(list(avgSteps = nonmissing$steps), by=list(interval = nonmissing$interval), FUN = mean)
+head(totalsByInterval)
+```
+
+Now let's plot the time series.
+``` {r plot_aggr_over_interval, echo=TRUE}
+plot(totalsByInterval$avgSteps ~ totalsByInterval$interval, type = "l", col = "red", main = "Average Number of Steps Taken by 5-minute Interval (across all days)", ylab = "Average number of steps", xlab = "Interval (in HHMM format)")
+```
+
+Which 5-min interval, on average across all the days in the dataset, contains the maximum number of steps?
+``` {r max_number_of_steps, echo=TRUE}
+maximum <- totalsByInterval[which.max(totalsByInterval$avgSteps), ]
+```
+The interval with the max number of steps is `r toString(maximum$interval)`, and the max number of steps is `r toString(maximum$avgSteps)`.
 
 ## Imputing missing values
 
