@@ -213,6 +213,13 @@ Now we'll aggregate the imputed data set to report the mean and median number of
 
 ```r
 totals_imputed <- aggregate(list(totalSteps = impute$steps), by=list(date = impute$date), FUN = sum)
+hist(totals_imputed$totalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
+rug(totals_imputed$totalStep)
+```
+
+![plot of chunk imputed_mean_median](figure/imputed_mean_median-1.png)
+
+```r
 mean_imputed <- mean(totals_imputed$totalStep)
 median_imputed <- median(totals_imputed$totalStep)
 ```
