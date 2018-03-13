@@ -90,9 +90,9 @@ We can add a bit more context by adding a rug to the histogram.
 
 
 ```r
-totals <- aggregate(list(TotalStep = nonmissing$steps), by=list(Date = nonmissing$date), FUN = sum)
-hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
-rug(totals$TotalStep)
+totals <- aggregate(list(totalStep = nonmissing$steps), by=list(date = nonmissing$date), FUN = sum)
+hist(totals$totalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
+rug(totals$totalStep)
 ```
 
 ![plot of chunk aggregate_steps_by_date](figure/aggregate_steps_by_date-1.png)
@@ -167,7 +167,64 @@ maximum <- totalsByInterval[which.max(totalsByInterval$avgSteps), ]
 The interval with the max number of steps is 835, and the max number of steps is 206.169811320755.
 
 ## Imputing missing values
+There are many missing values in this data set. Let's take a look at how many observations having missing values.
 
 
+```r
+head(data[is.na(data$steps),])
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+There are 2304 rows with missing values. For the first part of this analysis we removed the missing values. However, now we want to impute missing values with that completes the data set, but also doesn't change the distribution of the data. One way we can do this is to replace each observation with missing data with the mean of the steps for the corresponding interval. First what we'll do is copy the dataframe
+
+
+```r
+impute <- data.frame(data)
+nrow(impute[is.na(impute$steps),])
+```
+
+```
+## [1] 2304
+```
+
+Now we'll complete the missing values in the *impute* dataframe.
+
+
+```r
+library(dplyr)
+impute_steps <- function(x) filter(totalsByInterval, interval == x)$avgSteps
+impute[is.na(impute$steps),]$steps <- sapply(impute[is.na(impute$steps),]$interval, impute_steps)
+missing_rows_imputed <- nrow(impute[is.na(impute$steps),])
+```
+
+Note that the number of rows with missing data is now 0.
+
+Now we'll aggregate the imputed data set to report the mean and median number of steps per day.
+
+
+```r
+totals_imputed <- aggregate(list(totalSteps = impute$steps), by=list(date = impute$date), FUN = sum)
+mean_imputed <- mean(totals_imputed$totalStep)
+median_imputed <- median(totals_imputed$totalStep)
+```
+The **mean** is 10766.1886792453 steps and the **median** is 10766.1886792453 steps
+
+This is very similar to the totals without the missing values. This is because what we are doing is just replacing a normalized value for the missing values. Furthermore, we are adding the average by interval. In effect, we are not chainging the average of the totals by day.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+We have a good sense of the activity by date, and by 5-min interval. However, we don't have a good sense of how activity varies from day to day. One might hypothesize that the activity level on a weekend might be more than on a weekday where a subject may be working at relatively sedentary job. In order to get a better sense of the difference between activity on the weekend vs. the weekdays, we need to add a value to our data. We can use the funciton **weekdays()** to help us here.
+
+
+```r
+imputeWithWeekdays <- within(impute, {weekday = ifelse(grepl("S(at|un)", weekdays(impute$date, abbreviate=TRUE)), "weekend", "weekday")})
+imputeWithWeekdays$weekday <- as.factor(imputeWithWeekdays$weekday)
+```

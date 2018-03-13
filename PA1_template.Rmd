@@ -40,12 +40,12 @@ Now let's sum up the number of steps in each day. We can do that with the **aggr
 We can add a bit more context by adding a rug to the histogram.
 
 ```{r aggregate_steps_by_date, echo=TRUE}
-totals <- aggregate(list(TotalStep = nonmissing$steps), by=list(Date = nonmissing$date), FUN = sum)
-hist(totals$TotalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
-rug(totals$TotalStep)
+totals <- aggregate(list(totalStep = nonmissing$steps), by=list(date = nonmissing$date), FUN = sum)
+hist(totals$totalStep, breaks = 10, col = "blue", xlab = "Total Steps per day", main = "Distribution of Total Steps per Day")
+rug(totals$totalStep)
 ```
 
-The **mean** is `r toString(mean(totals$TotalStep))` steps and the **median** is `r median(totals$TotalStep)` steps
+The **mean** is `r toString(mean(totals$totalStep))` steps and the **median** is `r median(totals$totalStep)` steps
 
 ## What is the average daily activity pattern?
 What we need to do here is aggregate over the interval. So first let's look at what the interval looks like.
@@ -75,7 +75,45 @@ maximum <- totalsByInterval[which.max(totalsByInterval$avgSteps), ]
 The interval with the max number of steps is `r toString(maximum$interval)`, and the max number of steps is `r toString(maximum$avgSteps)`.
 
 ## Imputing missing values
+There are many missing values in this data set. Let's take a look at how many observations having missing values.
 
+```{r missing_values, echo=TRUE}
+head(data[is.na(data$steps),])
+```
 
+There are `r nrow(data[is.na(data$steps),])` rows with missing values. For the first part of this analysis we removed the missing values. However, now we want to impute missing values with that completes the data set, but also doesn't change the distribution of the data. One way we can do this is to replace each observation with missing data with the mean of the steps for the corresponding interval. First what we'll do is copy the dataframe
+
+```{r clone_data, echo=TRUE}
+impute <- data.frame(data)
+nrow(impute[is.na(impute$steps),])
+```
+
+Now we'll complete the missing values in the *impute* dataframe.
+
+```{r impute, echo=TRUE}
+library(dplyr)
+impute_steps <- function(x) filter(totalsByInterval, interval == x)$avgSteps
+impute[is.na(impute$steps),]$steps <- sapply(impute[is.na(impute$steps),]$interval, impute_steps)
+missing_rows_imputed <- nrow(impute[is.na(impute$steps),])
+```
+
+Note that the number of rows with missing data is now `r toString(missing_rows_imputed)`.
+
+Now we'll aggregate the imputed data set to report the mean and median number of steps per day.
+
+```{r imputed_mean_median, echo=TRUE}
+totals_imputed <- aggregate(list(totalSteps = impute$steps), by=list(date = impute$date), FUN = sum)
+mean_imputed <- mean(totals_imputed$totalStep)
+median_imputed <- median(totals_imputed$totalStep)
+```
+The **mean** is `r toString(mean_imputed)` steps and the **median** is `r toString(median_imputed)` steps
+
+This is very similar to the totals without the missing values. This is because what we are doing is just replacing a normalized value for the missing values. Furthermore, we are adding the average by interval. In effect, we are not chainging the average of the totals by day.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+We have a good sense of the activity by date, and by 5-min interval. However, we don't have a good sense of how activity varies from day to day. One might hypothesize that the activity level on a weekend might be more than on a weekday where a subject may be working at relatively sedentary job. In order to get a better sense of the difference between activity on the weekend vs. the weekdays, we need to add a value to our data. We can use the funciton **weekdays()** to help us here.
+
+```{r weeekday_weekends_activity, echo=TRUE}
+imputeWithWeekdays <- within(impute, {weekday = ifelse(grepl("S(at|un)", weekdays(impute$date, abbreviate=TRUE)), "weekend", "weekday")})
+imputeWithWeekdays$weekday <- as.factor(imputeWithWeekdays$weekday)
+```
