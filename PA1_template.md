@@ -227,4 +227,67 @@ We have a good sense of the activity by date, and by 5-min interval. However, we
 ```r
 imputeWithWeekdays <- within(impute, {weekday = ifelse(grepl("S(at|un)", weekdays(impute$date, abbreviate=TRUE)), "weekend", "weekday")})
 imputeWithWeekdays$weekday <- as.factor(imputeWithWeekdays$weekday)
+head(imputeWithWeekdays)
 ```
+
+```
+##       steps       date interval weekday
+## 1 1.7169811 2012-10-01        0 weekday
+## 2 0.3396226 2012-10-01        5 weekday
+## 3 0.1320755 2012-10-01       10 weekday
+## 4 0.1509434 2012-10-01       15 weekday
+## 5 0.0754717 2012-10-01       20 weekday
+## 6 2.0943396 2012-10-01       25 weekday
+```
+
+```r
+str(imputeWithWeekdays)
+```
+
+```
+## 'data.frame':	17568 obs. of  4 variables:
+##  $ steps   : num  1.717 0.3396 0.1321 0.1509 0.0755 ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+##  $ weekday : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+Now, let's aggregate by the interval, and by the weekday.
+
+```r
+aggImputeWithWeekdays <- aggregate(list(avgSteps = imputeWithWeekdays$steps), by=list(interval = imputeWithWeekdays$interval, weekday = imputeWithWeekdays$weekday), FUN=mean)
+head(aggImputeWithWeekdays)
+```
+
+```
+##   interval weekday   avgSteps
+## 1        0 weekday 2.25115304
+## 2        5 weekday 0.44528302
+## 3       10 weekday 0.17316562
+## 4       15 weekday 0.19790356
+## 5       20 weekday 0.09895178
+## 6       25 weekday 1.59035639
+```
+
+```r
+tail(aggImputeWithWeekdays)
+```
+
+```
+##     interval weekday    avgSteps
+## 571     2330 weekend  1.38797170
+## 572     2335 weekend 11.58726415
+## 573     2340 weekend  6.28773585
+## 574     2345 weekend  1.70518868
+## 575     2350 weekend  0.02830189
+## 576     2355 weekend  0.13443396
+```
+
+And now, let's plot average steps by interval for both weekday and weekend.
+
+```r
+library(lattice)
+ xyplot(avgSteps ~ interval | factor(weekday), data = aggImputeWithWeekdays, type = "l", xlab = "Interval", ylab = "Avg. Number of Steps", main = "Average Number of Steps by Interval for Weekdays and Weekends", layout = c(1,2))
+```
+
+![plot of chunk plot_agg](figure/plot_agg-1.png)

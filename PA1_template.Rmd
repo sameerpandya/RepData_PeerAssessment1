@@ -116,4 +116,19 @@ We have a good sense of the activity by date, and by 5-min interval. However, we
 ```{r weeekday_weekends_activity, echo=TRUE}
 imputeWithWeekdays <- within(impute, {weekday = ifelse(grepl("S(at|un)", weekdays(impute$date, abbreviate=TRUE)), "weekend", "weekday")})
 imputeWithWeekdays$weekday <- as.factor(imputeWithWeekdays$weekday)
+head(imputeWithWeekdays)
+str(imputeWithWeekdays)
+```
+
+Now, let's aggregate by the interval, and by the weekday.
+```{r impute_weekday_weekend_interval_agg, echo=TRUE}
+aggImputeWithWeekdays <- aggregate(list(avgSteps = imputeWithWeekdays$steps), by=list(interval = imputeWithWeekdays$interval, weekday = imputeWithWeekdays$weekday), FUN=mean)
+head(aggImputeWithWeekdays)
+tail(aggImputeWithWeekdays)
+```
+
+And now, let's plot average steps by interval for both weekday and weekend.
+```{r plot_agg, echo=TRUE}
+library(lattice)
+ xyplot(avgSteps ~ interval | factor(weekday), data = aggImputeWithWeekdays, type = "l", xlab = "Interval", ylab = "Avg. Number of Steps", main = "Average Number of Steps by Interval for Weekdays and Weekends", layout = c(1,2))
 ```
